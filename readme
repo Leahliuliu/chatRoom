@@ -1,5 +1,3 @@
-#chat-room
-
 #初始化项目
 npm init
 #安装包 nodejs-websocket
