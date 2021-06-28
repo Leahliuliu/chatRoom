@@ -3,5 +3,4 @@ npm init
 #安装包 nodejs-websocket
 npm install nodejs-websocket
 
-#npm 包管理器，可以下载淘宝镜像，会比较快
-
+基于nodejs和websocket的简单聊天室demo，进入聊天室时提示所有人该用户进入
