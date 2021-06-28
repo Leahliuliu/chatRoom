@@ -1,0 +1,7 @@
+#初始化项目
+npm init
+#安装包 nodejs-websocket
+npm install nodejs-websocket
+
+#npm 包管理器，可以下载淘宝镜像，会比较快
+

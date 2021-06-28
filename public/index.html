@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>聊天室</title>
+</head>
+<body>
+<h1>聊天室</h1>
+<div id="main">
+    <p>
+        <input type="text" id="username" placeholder="请输入用户名"/>
+        <button type="button" id="addBtn">加入</button>
+    </p>
+    <p>
+        <input type="text" id="message" placeholder="请输入聊天信息"/>
+        <button type="button" id="sendBtn" disabled>发送</button>
+    </p>
+    <ul id="msg"></ul>
+</div>
+
+</body>
+<script>
+    window.onload = function () {
+        //获取button对象
+        let addBtn = document.getElementById("addBtn")
+        let sendBtn = document.getElementById("sendBtn")
+        let username = document.getElementById("username")
+        var message = document.getElementById("message")
+        //定义全局
+        let ws = null;
+        addBtn.onclick = function () {
+            join()
+        }
+
+        //给文本框添加键盘点击事件
+        username.onkeyup = function (e) {
+            //如果输入的是回车，进聊天室
+            if (e.keyCode === 13) {
+                join()
+                username.disabled = true
+            }
+        }
+
+
+        sendBtn.onclick = function () {
+            sendMessage()
+        }
+        message.onkeyup = function(e){
+            if(e.keyCode === 13) sendMessage()
+        }
+
+        function join() {
+            addBtn.disabled = true
+            sendBtn.disabled = false
+            // 创建WebSocket对象，WebSocket使用的是ws协议
+            ws = new WebSocket('ws://localhost:2555')
+            ws.onopen = function () {
+                let username = document.getElementById("username").value
+                // 项服务器端发送消息
+                ws.send(
+                        // 往后台发送json字符串
+                        JSON.stringify({
+                            username: username,
+                            type: 'login'  //添加的对象
+                        })
+                )
+            }
+            // onmessage与ws已经绑定，接受消息回来的时候还是会回到这里来
+            // 服务器发送消息后会触发
+            ws.onmessage = function (e) {
+                console.log(e.data)
+                //字符串对象转json对象
+                let data = JSON.parse(e.data)
+                let show
+                switch (data.type) {
+                    case 'login': //新用户
+                        show = `${data.username}加入了房间`
+                        break;
+                    case 'msg': // 有新的聊天信息
+                        show = `${data.username} ${data.time} <br> ${data.message}`
+                        break
+                    case 'leave': //有人离开聊天室
+                        show = `${data.username}离开了房间 ${data.time}`
+                        break;
+                }
+                let li = document.createElement("li")
+                li.innerHTML = show
+                document.getElementById("msg").append(li)
+            }
+        }
+
+        function sendMessage() {
+            let username = document.getElementById("username").value
+            let msg = document.getElementById("message").value
+            //发送聊天消息给服务器
+            ws.send(JSON.stringify({
+                username: username,
+                message: msg,
+                type: 'msg'
+            }))
+            document.getElementById("message").value = ''
+        }
+    }
+</script>
+</html>
